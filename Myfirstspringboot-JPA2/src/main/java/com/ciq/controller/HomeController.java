@@ -1,6 +1,12 @@
 package com.ciq.controller;
 
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
@@ -12,6 +18,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.ciq.bean.Employee;
 import com.ciq.service.Employeeservice;
+import com.lowagie.text.DocumentException;
 
 @RestController
 public class HomeController {
@@ -47,6 +54,19 @@ public class HomeController {
 		Employee update = employeeservice.updateEmployee(employee);
 		return new ModelAndView("redirect:all");
 
-	
 	}
+	@GetMapping("/pdf")
+	public void exportToPdf(HttpServletResponse response) throws DocumentException, IOException {
+		response.setContentType("application/pdf");
+		DateFormat date=new SimpleDateFormat("YYYY-MM-DD:HH:MM:SS");
+		String current=date.format(new Date());
+		String header="conent-Disponsition";
+		String headervalue="attachement; filename=Employee"+current+".pdf";
+		response.setHeader(header, headervalue);
+		List<Employee>listemp=employeeservice.findall();
+		PdfController controller=new PdfController(listemp);
+		controller.export(response);
+	}
+	
+	
 }
